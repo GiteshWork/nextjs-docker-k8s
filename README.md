@@ -1,68 +1,102 @@
-🐳 Docker Setup
-3️⃣ Build and run locally
-docker build -t nextjs-blog .
-docker run -p 3000:3000 nextjs-blog
+1. Build and Run with Docker
+
+First, I created a Dockerfile for the Next.js app and built the image:
+
+docker build -t gittu1912/nextjs-blog .
 
 
-Now open http://localhost:3000
+To test it locally:
+
+docker run -p 3000:3000 gittu1912/nextjs-blog
+
+
+The app runs on http://localhost:3000
 .
 
-4️⃣ Using Docker Compose
-docker-compose up --build
+2. Push Image to Docker Hub
 
-🔑 Docker Hub Configuration
-5️⃣ Create Access Token
+I pushed the image to Docker Hub so it can be pulled by Kubernetes:
 
-Go to Docker Hub Security Settings
+docker push gittu1912/nextjs-blog:latest
 
-Create a new access token
 
-Save it for later (used in GitHub Secrets)
+Note: My Docker Hub credentials are stored securely as GitHub Action secrets to automate builds and pushes.
 
-🤖 GitHub Actions CI/CD
-6️⃣ Add GitHub Secrets
+3. Deploy on Kubernetes (Minikube)
 
-In your GitHub repo:
+I installed Minikube locally on Ubuntu to run Kubernetes clusters:
 
-DOCKER_HUB_USERNAME → Your Docker Hub username
+minikube start
 
-DOCKER_HUB_ACCESS_TOKEN → The token you created
 
-7️⃣ Workflow file
+Then I created a Deployment and Service for my app.
 
-Located at: .github/workflows/ci.yml
+deployment.yaml
 
-It:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nextjs
+  template:
+    metadata:
+      labels:
+        app: nextjs
+    spec:
+      containers:
+        - name: nextjs-container
+          image: gittu1912/nextjs-blog:latest
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextjs-service
+spec:
+  selector:
+    app: nextjs
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
 
-Logs in to Docker Hub
 
-Builds Docker image
+Apply the deployment:
 
-Pushes image to Docker Hub
+kubectl apply -f deployment.yaml
 
-🚀 CI/CD in Action
+4. Check Pods and Service
 
-Every push to the main branch will:
+Verify pods are running:
 
-Build Docker image
+kubectl get pods
 
-Tag as latest
 
-Push to Docker Hub:
+Check the service:
 
-docker.io/<your-username>/nextjs-blog:latest
+kubectl get svc
 
-📝 Usage
 
-Pull your image anywhere and run:
+If using Minikube, open the app in your browser:
 
-docker pull <your-username>/nextjs-blog:latest
-docker run -p 3000:3000 <your-username>/nextjs-blog:latest
+minikube service nextjs-service
 
-📂 Project Structure
-├── .github/workflows/ci.yml     # GitHub Actions workflow
-├── Dockerfile                   # Docker build instructions
-├── docker-compose.yml            # Local development setup
-├── pages/                       # Next.js pages
-├── public/                      # Static assets
-└── package.json
+5. Access the App
+
+Once the service is running, open the external IP or Minikube URL to see the Next.js blog live locally 🚀
+
+6. CI/CD Automation (Optional)
+
+Using GitHub Actions, I configured the workflow to:
+
+Build the Docker image.
+
+Push it to Docker Hub using credentials stored in GitHub Secrets.
+
+Deploy to Kubernetes automatically (if needed).
