@@ -36,6 +36,6 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE=yourdockerhubusername/nextjs-blog:latest
+          IMAGE=gittu1912/nextjs-blog:latest
           docker build -t $IMAGE .
           docker push $IMAGE
