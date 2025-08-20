@@ -32,7 +32,7 @@ jobs:
         run: npm run build
 
       - name: Log in to DockerHub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u gittu1912 --password-stdin}
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u gittu1912 --password-stdin
 
       - name: Build and Push Docker Image
         run: |
