@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nextjs
-          image: gittu1912/nextjs-app:latest
+          image: gittu1912/nextjs-blog:latest
           ports:
             - containerPort: 3000
       imagePullSecrets:
